@@ -4,6 +4,8 @@ from src.catalog import AircraftCatalog
 from src.exceptions import CatalogError, DamagedFileError, UnsupportedVersionError
 from src.models import AircraftPart
 
+FORMAT_VERSION = 1
+
 
 class CatalogStorage:
     def to_dict(self, part):
@@ -20,7 +22,7 @@ class CatalogStorage:
         result = []
         for detal in catalog:
             result.append(self.to_dict(detal))
-        json_doc = {"format_version": 1, "items": result}
+        json_doc = {"format_version": FORMAT_VERSION, "items": result}
         try:
             with open(path, "w", encoding="utf-8") as file:
                 dump(json_doc, file, ensure_ascii=False, indent=4)
@@ -42,7 +44,7 @@ class CatalogStorage:
         if "format_version" not in data or "items" not in data:
             raise DamagedFileError("Отсутствуют обязательные поля")
 
-        if data["format_version"] != 1:
+        if data["format_version"] != FORMAT_VERSION:
             raise UnsupportedVersionError("Неподдерживаемая версия")
 
         if not isinstance(data["items"], list):

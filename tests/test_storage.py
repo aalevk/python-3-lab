@@ -5,7 +5,7 @@ import pytest
 from src.catalog import AircraftCatalog
 from src.exceptions import DamagedFileError, UnsupportedVersionError
 from src.models import AircraftPart
-from src.storage import CatalogStorage
+from src.storage import FORMAT_VERSION, CatalogStorage
 
 
 def create_part(part_id, name):
@@ -38,7 +38,7 @@ def test_save_and_load(tmp_path):
 
 def test_load_empty_catalog(tmp_path):
     path = tmp_path / "catalog.json"
-    data = {"format_version": 1, "items": []}
+    data = {"format_version": FORMAT_VERSION, "items": []}
     path.write_text(json.dumps(data), encoding="utf-8")
 
     catalog = AircraftCatalog()
@@ -63,7 +63,7 @@ def test_load_wrong_json(tmp_path):
 
 def test_load_wrong_version(tmp_path):
     path = tmp_path / "catalog.json"
-    data = {"format_version": 2, "items": []}
+    data = {"format_version": FORMAT_VERSION + 1, "items": []}
     path.write_text(json.dumps(data), encoding="utf-8")
 
     catalog = AircraftCatalog()
@@ -88,7 +88,10 @@ def test_load_does_not_change_catalog_if_data_is_wrong(tmp_path):
     catalog.add(old_part)
 
     path = tmp_path / "catalog.json"
-    data = {"format_version": 1, "items": [{"id": "A002", "name": "Новое крыло"}]}
+    data = {
+        "format_version": FORMAT_VERSION,
+        "items": [{"id": "A002", "name": "Новое крыло"}]
+    }
     path.write_text(json.dumps(data), encoding="utf-8")
 
     storage = CatalogStorage()
@@ -108,7 +111,7 @@ def test_load_duplicate_id(tmp_path):
 
     path = tmp_path / "catalog.json"
     data = {
-        "format_version": 1,
+        "format_version": FORMAT_VERSION,
         "items": [
             {
                 "id": "A002",
